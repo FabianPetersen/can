@@ -8,8 +8,6 @@ import (
 	"syscall"
 )
 
-const CAN_RAW_JOIN_FILTER = 0x6
-
 func NewReadWriteCloserForInterface(i *net.Interface) (ReadWriteCloser, error) {
 	s, _ := syscall.Socket(syscall.AF_CAN, syscall.SOCK_RAW, unix.CAN_RAW)
 	addr := &unix.SockaddrCAN{Ifindex: i.Index}
@@ -46,6 +44,10 @@ func (rwc *readWriteCloser) setBlockFilter(disallowedIds []uint32) error {
 		return ErrorKernelFilterNotSupported
 	}
 
+	if len(disallowedIds) >= unix.CAN_RAW_FILTER_MAX {
+		return ErrorKernelFilterTooMany
+	}
+
 	filter := make([]unix.CanFilter, len(disallowedIds))
 
 	for i, disallowedId := range disallowedIds {
@@ -53,7 +55,7 @@ func (rwc *readWriteCloser) setBlockFilter(disallowedIds []uint32) error {
 		filter[i].Mask = unix.CAN_SFF_MASK
 	}
 
-	return unix.SetsockoptCanRawFilter(rwc.socket, unix.SOL_CAN_RAW, unix.CAN_RAW_JOIN_FILTER, filter)
+	return unix.SetsockoptCanRawFilter(rwc.socket, unix.SOL_CAN_RAW, unix.CAN_RAW_JOIN_FILTERS, filter)
 }
 
 func (rwc *readWriteCloser) deleteFilter() error {
