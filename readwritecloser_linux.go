@@ -61,8 +61,12 @@ func (rwc *readWriteCloser) setBlockFilter(disallowedIds []uint32) error {
 		return err
 	}
 
-	// Join the filters (https://github.com/linux-can/can-utils/commit/1a2467ed29302149d4d1253888ac1f1dfcc11d3f)
-	return unix.SetsockoptByte(rwc.socket, unix.SOL_CAN_RAW, unix.CAN_RAW_JOIN_FILTERS, 1)
+	if len(disallowedIds) > 1 {
+		// Join the filters (https://github.com/linux-can/can-utils/commit/1a2467ed29302149d4d1253888ac1f1dfcc11d3f)
+		return unix.SetsockoptInt(rwc.socket, unix.SOL_CAN_RAW, unix.CAN_RAW_JOIN_FILTERS, 1)
+	}
+
+	return nil
 }
 
 func (rwc *readWriteCloser) deleteFilter() error {
