@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"syscall"
-	"unsafe"
 )
 
 func NewReadWriteCloserForInterface(i *net.Interface) (ReadWriteCloser, error) {
@@ -63,8 +62,7 @@ func (rwc *readWriteCloser) setBlockFilter(disallowedIds []uint32) error {
 	}
 
 	// Join the filters (https://github.com/linux-can/can-utils/commit/1a2467ed29302149d4d1253888ac1f1dfcc11d3f)
-	var join_filter = 1
-	return syscall.Setsockopt(rwc.socket, unix.SOL_CAN_RAW, unix.CAN_RAW_JOIN_FILTERS, &join_filter, unsafe.Sizeof(join_filter))
+	return unix.SetsockoptByte(rwc.socket, unix.SOL_CAN_RAW, unix.CAN_RAW_JOIN_FILTERS, 1)
 }
 
 func (rwc *readWriteCloser) deleteFilter() error {
