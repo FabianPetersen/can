@@ -58,6 +58,9 @@ func (rwc *readWriteCloser) setBlockFilter(disallowedIds []uint32) error {
 
 	// Add the filters
 	err := unix.SetsockoptCanRawFilter(rwc.socket, unix.SOL_CAN_RAW, unix.CAN_RAW_FILTER, filter)
+	if err != nil {
+		return err
+	}
 
 	// Join the filters (https://github.com/linux-can/can-utils/commit/1a2467ed29302149d4d1253888ac1f1dfcc11d3f)
 	var join_filter = 1
