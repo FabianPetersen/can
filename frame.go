@@ -26,6 +26,21 @@ type Frame struct {
 	Data   [MaxFrameDataLength]uint8
 }
 
+func (from *Frame) Equals(to *Frame) bool {
+	if from.ID == to.ID {
+		if from.Length == to.Length {
+			for i := 0; i < int(from.Length); i++ {
+				if from.Data[i] != to.Data[i] {
+					return false
+				}
+			}
+			return true
+		}
+	}
+
+	return false
+}
+
 // Marshal returns the byte encoding of frm.
 func Marshal(frm Frame) (b []byte, err error) {
 	wr := errWriter{
